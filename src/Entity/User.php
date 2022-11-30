@@ -42,9 +42,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $plainpassword = null;
-
     #[ORM\ManyToOne(inversedBy: 'users')]
     private ?Groups $groups_id = null;
 
