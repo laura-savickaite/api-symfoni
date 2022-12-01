@@ -7,10 +7,27 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\GetCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ApiResource]
+#[ApiResource (
+    operations: [
+        new Get(
+            normalizationContext: ['groups' => ['user:get:read']],
+        ),
+        new GetCollection(
+            normalizationContext: ['groups' => ['user:get_collection:read']],
+        ),
+        new Post(
+            normalizationContext: ['groups' => ''],
+            denormalizationContext: ['groups' => ['user:post:write']]
+        )
+])]
+
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -19,6 +36,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
+    #[Groups(['user:get:read', 'user:post:write'])]
     private ?string $email = null;
 
     #[ORM\Column]
@@ -28,12 +46,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var string The hashed password
      */
     #[ORM\Column]
+    #[Groups(['user:post:write'])]
     private ?string $password = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['user:get:read', 'user:get_collection:read', 'user:post:write'])]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['user:get:read', 'user:get_collection:read', 'user:post:write'])]
     private ?string $lastname = null;
 
     #[ORM\Column]
@@ -43,7 +64,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'users')]
-    private ?Groups $groups_id = null;
+    #[Groups('user:get:read', 'user:post:write')]
+    private ?Groupes $groupes_id = null;
 
     public function getId(): ?int
     {
@@ -163,14 +185,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getGroupsId(): ?Groups
+    public function getGroupesId(): ?Groupes
     {
-        return $this->groups_id;
+        return $this->groupes_id;
     }
 
-    public function setGroupsId(?Groups $groups_id): self
+    public function setGroupesId(?Groupes $groupes_id): self
     {
-        $this->groups_id = $groups_id;
+        $this->groupes_id = $groupes_id;
 
         return $this;
     }

@@ -3,14 +3,23 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
-use App\Repository\GroupsRepository;
+use App\Repository\GroupesRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
-#[ORM\Entity(repositoryClass: GroupsRepository::class)]
-#[ApiResource]
-class Groups
+#[ORM\Entity(repositoryClass: GroupesRepository::class)]
+#[ApiResource(
+    operations: [
+        new GetCollection(
+            normalizationContext: ['groups' => ['groups:get_collection:read']],
+        )
+    ]
+)]
+class Groupes
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -18,6 +27,7 @@ class Groups
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups('groups:get_collection:read')]
     private ?string $name = null;
 
     #[ORM\Column]
@@ -26,7 +36,7 @@ class Groups
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
-    #[ORM\OneToMany(mappedBy: 'groups_id', targetEntity: User::class)]
+    #[ORM\OneToMany(mappedBy: 'groupes_id', targetEntity: User::class)]
     private Collection $users;
 
     public function __construct()
@@ -87,7 +97,7 @@ class Groups
     {
         if (!$this->users->contains($user)) {
             $this->users->add($user);
-            $user->setGroupsId($this);
+            $user->setGroupesId($this);
         }
 
         return $this;
@@ -97,8 +107,8 @@ class Groups
     {
         if ($this->users->removeElement($user)) {
             // set the owning side to null (unless already changed)
-            if ($user->getGroupsId() === $this) {
-                $user->setGroupsId(null);
+            if ($user->getGroupesId() === $this) {
+                $user->setGroupesId(null);
             }
         }
 
