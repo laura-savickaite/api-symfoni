@@ -9,8 +9,10 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\GetCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
+use App\State\UsersProcessor;
 
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -24,7 +26,11 @@ use Symfony\Component\Serializer\Annotation\Groups;
         ),
         new Post(
             normalizationContext: ['groups' => ''],
-            denormalizationContext: ['groups' => ['user:post:write']]
+            denormalizationContext: ['groups' => ['user:post:write']],
+            processor: UsersProcessor::class
+        ),
+        new Delete(
+            normalizationContext: ['groups' => ['user:delete']],
         )
 ])]
 
@@ -33,6 +39,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups('user:delete')]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
